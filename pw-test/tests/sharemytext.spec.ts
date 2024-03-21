@@ -1,0 +1,32 @@
+import { test, expect } from "@playwright/test";
+
+test.only("test", async ({ page }) => {
+  await page.goto("https://sharemytext.web.app/");
+  await page.getByPlaceholder("Enter You Text Here, Press").click();
+  await page.getByPlaceholder("Enter You Text Here, Press").fill("Hello There");
+  await page.getByPlaceholder("Room Id (Optional)").click();
+  await page.getByPlaceholder("Room Id (Optional)").fill("test");
+  await page.getByRole("button", { name: "Share" }).click();
+  await expect(page.locator("pre")).toContainText("Hello There");
+  await page.getByPlaceholder("Enter You Text Here, Press").click();
+  await page.getByPlaceholder("Enter You Text Here, Press").press("Control+a");
+  await page.getByPlaceholder("Enter You Text Here, Press").fill("");
+  await page.getByPlaceholder("Enter You Text Here, Press").press("Control+z");
+  await page.getByRole("button", { name: "Clear" }).click();
+  await page.getByRole("button", { name: "Clear" }).click();
+  await page.getByRole("button", { name: "Clear" }).click();
+  await page.getByRole("button", { name: "Clear" }).click();
+  await page.getByRole("button", { name: "Clear" }).click();
+  await page.getByRole("button", { name: "Clear" }).click();
+  await page.getByPlaceholder("Enter You Text Here, Press").click();
+  await page.getByPlaceholder("Enter You Text Here, Press").press("Control+a");
+  await page.getByPlaceholder("Enter You Text Here, Press").fill("New Text");
+  await page.getByPlaceholder("Encryption Code (Optional)").click();
+  await page.getByPlaceholder("Encryption Code (Optional)").fill("test");
+  await page.getByRole("button", { name: "Share" }).click();
+  await page.getByPlaceholder("Decryption Code").click();
+  await page.getByPlaceholder("Decryption Code").fill("test");
+  await page.getByRole("button", { name: "Decrypt Data" }).click();
+  await page.locator("pre").click();
+  await expect(page.locator("pre")).toContainText("New Text");
+});

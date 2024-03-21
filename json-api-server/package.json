@@ -1,0 +1,17 @@
+{
+  "name": "json-api-server",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "fortune": "^5.5.18",
+    "fortune-http": "^1.2.27",
+    "fortune-json-api": "^2.3.0"
+  }
+}

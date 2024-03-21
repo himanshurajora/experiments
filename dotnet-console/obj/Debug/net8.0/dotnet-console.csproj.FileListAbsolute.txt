@@ -1,0 +1,14 @@
+/home/himanshu/test/dotnet-console/bin/Debug/net8.0/dotnet-console
+/home/himanshu/test/dotnet-console/bin/Debug/net8.0/dotnet-console.deps.json
+/home/himanshu/test/dotnet-console/bin/Debug/net8.0/dotnet-console.runtimeconfig.json
+/home/himanshu/test/dotnet-console/bin/Debug/net8.0/dotnet-console.dll
+/home/himanshu/test/dotnet-console/bin/Debug/net8.0/dotnet-console.pdb
+/home/himanshu/test/dotnet-console/obj/Debug/net8.0/dotnet-console.GeneratedMSBuildEditorConfig.editorconfig
+/home/himanshu/test/dotnet-console/obj/Debug/net8.0/dotnet-console.AssemblyInfoInputs.cache
+/home/himanshu/test/dotnet-console/obj/Debug/net8.0/dotnet-console.AssemblyInfo.cs
+/home/himanshu/test/dotnet-console/obj/Debug/net8.0/dotnet-console.csproj.CoreCompileInputs.cache
+/home/himanshu/test/dotnet-console/obj/Debug/net8.0/dotnet-console.dll
+/home/himanshu/test/dotnet-console/obj/Debug/net8.0/refint/dotnet-console.dll
+/home/himanshu/test/dotnet-console/obj/Debug/net8.0/dotnet-console.pdb
+/home/himanshu/test/dotnet-console/obj/Debug/net8.0/dotnet-console.genruntimeconfig.cache
+/home/himanshu/test/dotnet-console/obj/Debug/net8.0/ref/dotnet-console.dll
