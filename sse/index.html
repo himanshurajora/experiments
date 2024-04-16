@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <h1>Counter from SSE: <span id="count"></span></h1>
+  </body>
+  <script>
+    const event = new EventSource("http://localhost:3000/events");
+
+    event.onmessage = (e) => {
+      document.getElementById("count").innerText = e.data;
+    };
+  </script>
+</html>
