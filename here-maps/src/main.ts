@@ -4,7 +4,7 @@ import { TrafficData, trafficData } from "./data";
 import * as _ from "lodash";
 // Initialize communication with the platform
 const platform = new H.service.Platform({
-  apiKey: "<API KEY>",
+  apiKey: "API_KEY",
 });
 
 // Default options for the base layers that are used to render a map
@@ -39,7 +39,7 @@ var ui = H.ui.UI.createDefault(map, defaultLayers);
 const url = `https://data.traffic.hereapi.com/v7/flow?in=circle:${circleData.lat},${circleData.lng};r=${circleData.radius}&apiKey=D18cdKQ7FurdOTqcgtFqqmwIV1Zy8u4omceXLrCguIA&locationReferencing=shape`;
 
 fetch(url).then((response) => {
-  response.json().then((data: TrafficData) => {
+  response.json().then(async (data: TrafficData) => {
     const results = data.results;
 
     console.log("Results: ", results);
@@ -70,42 +70,72 @@ fetch(url).then((response) => {
     // Add the circle to the map
     map.addObject(circle);
 
-    // filter all the points that are inside the circle
-    const resultsInsideTheCircle = _.filter(results, (result, resultIndex) => {
-      // if any point of current result is inside the circle, return the result
+    const allPoints = _.map(results, (result, resultIndex) => {
       const points = _.flatMap(result.location.shape.links, (link) => {
         return link.points;
       });
 
-      return _.some(points, (point) => {
-        let distance = Math.sqrt(
-          Math.pow(point.lat - circleData.lat, 2) +
-            Math.pow(point.lng - circleData.lng, 2)
-        );
-
-        // this distance is withing the co-ordinates
-        // convert the distance to meters
-        distance = distance * 111000; // 1 degree = 111000 meters
-
-        if (distance <= circleData.radius === false) console.log("false");
-        return distance <= circleData.radius;
-      });
+      return points;
     });
 
-    // average jam factor of intersected points
-    const jamFactorInsideTheCircle = _.meanBy(
-      resultsInsideTheCircle,
-      (result) => {
-        return result.currentFlow.jamFactor;
-      }
-    );
+    console.log("Points inside the circle: ", allPoints);
 
-    console.log(jamFactorInsideTheCircle);
+    setTimeout(function () {
+      window.dispatchEvent(new Event("resize"));
+    }, 200);
+
+    for (let points of allPoints) {
+      for (let j = 0; j < points.length - 1; j++) {
+        // draw line between two points
+        const point1 = points[j];
+        const point2 = points[j + 1];
+
+        const lineString = new H.geo.LineString();
+        lineString.pushLatLngAlt(point1.lat, point1.lng);
+        lineString.pushPoint(point2);
+
+        const polyline = new H.map.Polyline(lineString, {
+          style: {
+            lineWidth: 4,
+            strokeColor: "rgba(0, 255, 0, 0.5)",
+          },
+        });
+
+        map.addObject(polyline);
+        // check if the line intersects the circle
+        if (
+          lineIntersectsCircle(
+            point1,
+            point2,
+            { lat: circleData.lat, lng: circleData.lng },
+            circleData.radius
+          )
+        ) {
+          console.log("Line intersects the circle");
+          // draw the line with red color
+          const polyline = new H.map.Polyline(lineString, {
+            style: {
+              lineWidth: 4,
+              strokeColor: "rgba(255, 0, 0, 0.5)",
+            },
+          });
+
+          map.addObject(polyline);
+        } else {
+          console.log("Line does not intersect the circle");
+        }
+        await sleep(2);
+      }
+    }
 
     setTimeout(() => {
       console.log("Drawing points inside the circle");
-      drawPoints(resultsInsideTheCircle, true);
+      drawPoints(results, true);
     }, 10000);
+
+    function sleep(ms: number) {
+      return new Promise((resolve) => setTimeout(resolve, ms));
+    }
 
     function drawPoints(resultsToDraw: any, recal = false) {
       // remove all the previous objects from the map
@@ -140,9 +170,7 @@ fetch(url).then((response) => {
               {
                 style: {
                   lineWidth: 0,
-                  fillColor: recal
-                    ? "rgba(255, 0, 0, 0.5)"
-                    : "rgba(0, 0, 255, 0.5)",
+                  fillColor: "rgba(0, 0, 255, 0.5)",
                 },
               }
             );
@@ -158,9 +186,7 @@ fetch(url).then((response) => {
         var polyline = new H.map.Polyline(lineString, {
           style: {
             lineWidth: 4,
-            strokeColor: recal
-              ? "rgba(255, 0, 0, 0.5)"
-              : "rgba(0, 0, 255, 0.5)",
+            strokeColor: "rgba(0, 0, 255, 0.5)",
           },
         });
 
@@ -170,3 +196,86 @@ fetch(url).then((response) => {
     }
   });
 });
+
+// check if a line intersects a circle
+function lineIntersectsCircle(
+  l1: { lat: number; lng: number },
+  l2: { lat: number; lng: number },
+  c: { lat: number; lng: number },
+  r: number
+) {
+  // first check if the any of the points are inside the circle
+  const distance1 = Math.sqrt(
+    Math.pow(c.lat - l1.lat, 2) + Math.pow(c.lng - l1.lng, 2)
+  );
+  const distance2 = Math.sqrt(
+    Math.pow(c.lat - l2.lat, 2) + Math.pow(c.lng - l2.lng, 2)
+  );
+
+  // convert the distance to meters
+  const distance1InMeters = distance1 * 111000;
+  const distance2InMeters = distance2 * 111000;
+
+  if (distance1InMeters <= r || distance2InMeters <= r) {
+    return true;
+  }
+
+  // convert the points to meters
+  const l1InMeters = {
+    lat: l1.lat * 111000,
+    lng: l1.lng * 111000,
+  };
+
+  const l2InMeters = {
+    lat: l2.lat * 111000,
+    lng: l2.lng * 111000,
+  };
+
+  // convert the circle center to meters
+  const cInMeters = {
+    lat: c.lat * 111000,
+    lng: c.lng * 111000,
+  };
+
+  /*
+    Formula
+    // parameters: ax ay bx by cx cy r
+    ax -= cx;
+    ay -= cy;
+    bx -= cx;
+    by -= cy;
+    a = (bx - ax)^2 + (by - ay)^2;
+    b = 2*(ax*(bx - ax) + ay*(by - ay));
+    c = ax^2 + ay^2 - r^2;
+    disc = b^2 - 4*a*c;
+    if(disc <= 0) return false;
+    sqrtdisc = sqrt(disc);
+    t1 = (-b + sqrtdisc)/(2*a);
+    t2 = (-b - sqrtdisc)/(2*a);
+    if((0 < t1 && t1 < 1) || (0 < t2 && t2 < 1)) return true;
+    return false;
+  */
+
+  const ax = l1InMeters.lat - cInMeters.lat;
+  const ay = l1InMeters.lng - cInMeters.lng;
+  const bx = l2InMeters.lat - cInMeters.lat;
+  const by = l2InMeters.lng - cInMeters.lng;
+  const a = Math.pow(bx - ax, 2) + Math.pow(by - ay, 2);
+  const b = 2 * (ax * (bx - ax) + ay * (by - ay));
+  const c1 = Math.pow(ax, 2) + Math.pow(ay, 2) - Math.pow(r, 2);
+  const disc = Math.pow(b, 2) - 4 * a * c1;
+
+  if (disc <= 0) {
+    return false;
+  }
+
+  const sqrtdisc = Math.sqrt(disc);
+  const t1 = (-b + sqrtdisc) / (2 * a);
+  const t2 = (-b - sqrtdisc) / (2 * a);
+
+  if ((0 < t1 && t1 < 1) || (0 < t2 && t2 < 1)) {
+    return true;
+  }
+
+  return false;
+}
