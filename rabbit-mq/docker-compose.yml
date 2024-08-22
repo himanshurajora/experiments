@@ -1,0 +1,18 @@
+version: "3.8"
+
+services:
+  rabbitmq:
+    image: rabbitmq
+    container_name: rabbitmq
+    ports:
+      - "5672:5672" # RabbitMQ's default port
+      - "15672:15672" # RabbitMQ Management plugin's default port
+    environment:
+      RABBITMQ_DEFAULT_USER: user # Default username
+      RABBITMQ_DEFAULT_PASS: password # Default password
+      RABBITMQ_ERLANG_COOKIE: secretcookie # Required for clustering nodes
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq # Persist data
+
+volumes:
+  rabbitmq_data:
